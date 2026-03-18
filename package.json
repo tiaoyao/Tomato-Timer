@@ -7,7 +7,11 @@
     "start": "electron ."
   },
   "keywords": ["pomodoro", "timer", "electron", "desktop"],
-  "author": "Tomato Timer",
+  "author": {
+    "name": "Tomato Timer",
+    "email": "hello@example.com"
+  },
+  "homepage": "https://github.com/TomatoTimer",
   "license": "MIT",
   "devDependencies": {
     "electron": "^29.0.0",
@@ -26,7 +30,7 @@
       "target": ["dmg", "zip"]
     },
     "linux": {
-      "target": ["AppImage", "deb"],
+      "target": ["AppImage"],
       "category": "Utility"
     }
   }
