@@ -10,6 +10,23 @@
   "author": "Tomato Timer",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^29.0.0"
+    "electron": "^29.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.tomatotimer.app",
+    "productName": "TomatoTimer",
+    "directories": {
+      "output": "dist-app"
+    },
+    "win": {
+      "target": ["nsis", "portable"]
+    },
+    "mac": {
+      "target": ["dmg", "zip"]
+    },
+    "linux": {
+      "target": ["AppImage", "deb"]
+    }
   }
 }
