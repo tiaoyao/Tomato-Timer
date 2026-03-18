@@ -1,6 +1,6 @@
 {
   "name": "tomato-timer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "一个简约的番茄时钟桌面程序（macOS 风格）",
   "main": "main.js",
   "scripts": {
