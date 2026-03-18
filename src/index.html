@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<!--
+  index.html — 番茄时钟主界面
+  macOS 风格无边框悬浮窗，冷色调毛玻璃设计
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>番茄时钟</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ═══ 主卡片容器 ═══════════════════════════════════════════ -->
+  <div class="app-card">
+
+    <!-- 顶部拖拽区域 + 控制按钮 -->
+    <div class="titlebar" id="titlebar">
+      <div class="window-controls">
+        <!-- 关闭按钮（最小化到托盘） -->
+        <button class="wc-btn wc-close" id="btn-close" title="最小化到托盘" onclick="minimizeToTray()">
+          <svg width="6" height="6" viewBox="0 0 6 6"><line x1="0" y1="0" x2="6" y2="6" stroke="rgba(0,0,0,0.5)" stroke-width="1.5"/><line x1="6" y1="0" x2="0" y2="6" stroke="rgba(0,0,0,0.5)" stroke-width="1.5"/></svg>
+        </button>
+        <!-- 退出按钮 -->
+        <button class="wc-btn wc-quit" id="btn-quit" title="退出程序" onclick="quitApp()">
+          <svg width="6" height="6" viewBox="0 0 6 6"><rect x="0.5" y="2.5" width="5" height="1" rx="0.5" fill="rgba(0,0,0,0.5)"/></svg>
+        </button>
+      </div>
+      <span class="app-title">🍅 番茄时钟</span>
+      <!-- 设置按钮 -->
+      <button class="icon-btn" id="btn-settings" title="设置" onclick="Settings.toggle()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- ═══ 模式切换标签 ═════════════════════════════════════ -->
+    <div class="mode-tabs">
+      <button class="mode-btn active" data-mode="pomodoro"     onclick="switchMode('pomodoro')">番茄</button>
+      <button class="mode-btn"        data-mode="short-break"  onclick="switchMode('short-break')">短休</button>
+      <button class="mode-btn"        data-mode="long-break"   onclick="switchMode('long-break')">长休</button>
+    </div>
+
+    <!-- ═══ 计时器圆环区域 ════════════════════════════════════ -->
+    <div class="timer-area">
+      <svg class="progress-svg" viewBox="0 0 260 260" width="220" height="220">
+        <!-- 背景轨道圆 -->
+        <circle
+          cx="130" cy="130" r="110"
+          fill="none"
+          stroke="rgba(255,255,255,0.06)"
+          stroke-width="8"
+        />
+        <!-- 进度圆弧 -->
+        <circle
+          id="progress-ring"
+          cx="130" cy="130" r="110"
+          fill="none"
+          stroke="var(--accent)"
+          stroke-width="8"
+          stroke-linecap="round"
+          stroke-dasharray="691.15"
+          stroke-dashoffset="0"
+          transform="rotate(-90 130 130)"
+          style="transition: stroke-dashoffset 1s linear, stroke 0.4s ease;"
+        />
+        <!-- 时间文字 -->
+        <text id="time-display" x="130" y="122" text-anchor="middle" class="time-text">25:00</text>
+        <!-- 模式标签 -->
+        <text id="mode-label" x="130" y="152" text-anchor="middle" class="mode-label-text">番茄时间</text>
+      </svg>
+    </div>
+
+    <!-- ═══ 操作按钮 ══════════════════════════════════════════ -->
+    <div class="action-row">
+      <button class="btn-reset" id="btn-reset" onclick="Timer.reset()" title="重置">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
+        </svg>
+      </button>
+      <button class="btn-start" id="btn-start" onclick="Timer.toggle()">开始</button>
+      <div class="btn-placeholder"></div>
+    </div>
+
+    <!-- ═══ 今日番茄统计 ══════════════════════════════════════ -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-icon">🍅</span>
+        <div class="stat-info">
+          <span class="stat-value" id="today-count">0</span>
+          <span class="stat-label">今日完成</span>
+        </div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-card">
+        <span class="stat-icon">🔥</span>
+        <div class="stat-info">
+          <span class="stat-value" id="streak-count">0</span>
+          <span class="stat-label">连续番茄</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .app-card -->
+
+  <!-- ═══ 设置面板（侧滑抽屉）══════════════════════════════════ -->
+  <div class="settings-overlay" id="settings-overlay" onclick="Settings.close()"></div>
+  <div class="settings-panel" id="settings-panel">
+    <div class="settings-header">
+      <h3>⚙️ 时间设置</h3>
+      <button class="icon-btn" onclick="Settings.close()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="settings-body">
+      <div class="setting-item">
+        <label>🍅 番茄时长</label>
+        <div class="input-group">
+          <input type="number" id="set-pomodoro" min="1" max="99" value="25">
+          <span class="unit">分钟</span>
+        </div>
+      </div>
+      <div class="setting-item">
+        <label>☕ 短休时长</label>
+        <div class="input-group">
+          <input type="number" id="set-short-break" min="1" max="30" value="5">
+          <span class="unit">分钟</span>
+        </div>
+      </div>
+      <div class="setting-item">
+        <label>🌴 长休时长</label>
+        <div class="input-group">
+          <input type="number" id="set-long-break" min="1" max="60" value="15">
+          <span class="unit">分钟</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-save-settings" onclick="Settings.save()">保存设置</button>
+  </div>
+
+  <!-- ═══ 脚本引入（顺序重要）════════════════════════════════ -->
+  <script src="storage.js"></script>
+  <script src="sound.js"></script>
+  <script src="notification.js"></script>
+  <script src="timer.js"></script>
+  <script src="settings.js"></script>
+
+  <script>
+    // ─── 初始化 ──────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      Timer.init();
+
+      // 设置 SVG 圆环的 strokeDasharray（使用 JS 确保精确）
+      const circumference = 2 * Math.PI * 110;
+      const ring = document.getElementById('progress-ring');
+      ring.style.strokeDasharray = circumference;
+      ring.style.strokeDashoffset = 0;
+    });
+
+    // ─── 模式切换 ────────────────────────────────────────────
+    function switchMode(mode) {
+      Sound.playClick();
+      Timer.setMode(mode);
+      // 更新模式标签文字
+      const labels = { pomodoro: '番茄时间', 'short-break': '短暂休息', 'long-break': '长时间休息' };
+      document.getElementById('mode-label').textContent = labels[mode];
+    }
+
+    // ─── 窗口控制 ────────────────────────────────────────────
+    function minimizeToTray() {
+      const { ipcRenderer } = require('electron');
+      ipcRenderer.send('minimize-to-tray');
+    }
+
+    function quitApp() {
+      const { ipcRenderer } = require('electron');
+      ipcRenderer.send('quit-app');
+    }
+
+    // ─── 连续番茄数同步到 UI ─────────────────────────────────
+    // （通过 Timer.pomodoroStreak 实时更新）
+    setInterval(() => {
+      const el = document.getElementById('streak-count');
+      if (el) el.textContent = Timer.pomodoroStreak;
+    }, 500);
+  </script>
+
+</body>
+</html>
